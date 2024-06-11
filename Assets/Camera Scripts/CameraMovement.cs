@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CameraMovement : MonoBehaviour
 {
@@ -10,6 +11,11 @@ public class CameraMovement : MonoBehaviour
     public float minHorizontalPosition = -10f; // Minimum horizontal position
     public float maxVerticalPosition = 10f; // Maximum vertical position
     public float minVerticalPosition = -10f; // Minimum vertical position
+
+
+    public GameObject uiButtonPrefab;
+    private bool buttonInstantiated = false; // Flag to track whether the button is instantiated
+    private GameObject instantiatedButton; // Reference to the instantiated button
 
     void Update()
     {
@@ -40,8 +46,39 @@ public class CameraMovement : MonoBehaviour
         {
             movement += Vector3.down * Mathf.Min(moveSpeed * Time.deltaTime, transform.position.y - minVerticalPosition);
         }
+        //
+        //
+        //
+        //
+        //Right Button
+        // Check if the camera is at the maximum right position
+        if (transform.position.x >= maxHorizontalPosition)
+        {
+            // If the UI button is not yet instantiated, instantiate it
+            if (!buttonInstantiated && uiButtonPrefab != null)
+            {
+                instantiatedButton = Instantiate(uiButtonPrefab, new Vector3(screenWidth - 100, Screen.height / 2, 0), Quaternion.identity);
+                buttonInstantiated = true; // Set the flag to true to indicate that the button is instantiated
+            
+            }
+        }
+        // If the camera moves away from the maximum right position and the button is instantiated, destroy the button
+        else if (buttonInstantiated)
+        {
+            Destroy(instantiatedButton);
+            buttonInstantiated = false; // Reset the flag
+        }
+        //
+        //
+        //
+        //
 
         // Apply the movement
         transform.Translate(movement);
+    }
+    public void OnButtonClick()
+    {
+        Debug.Log("Button clicked!");
+        // Add your custom logic here to handle the button click
     }
 }
