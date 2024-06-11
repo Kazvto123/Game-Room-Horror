@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5093805695889126431}
-  - component: {fileID: 4538222178034094118}
+  - component: {fileID: 6315651906171934577}
   m_Layer: 0
   m_Name: Handler
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 602129464324482358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4538222178034094118
+--- !u!114 &6315651906171934577
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d00b29b634ec83c4da3261771693c7b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RightTurned: 0
 --- !u!1 &4912781403482459035
 GameObject:
   m_ObjectHideFlags: 0
@@ -267,7 +268,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4538222178034094118}
+      - m_Target: {fileID: 6315651906171934577}
         m_TargetAssemblyTypeName: RightTurnButton, Assembly-CSharp
         m_MethodName: HandleButtonClick
         m_Mode: 1
