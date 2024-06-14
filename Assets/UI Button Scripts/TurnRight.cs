@@ -10,4 +10,9 @@ public class TurnRight : MonoBehaviour
         CamMove.RightTurn();
     }
 
+    public void OnClickLeft()
+    {
+        CamMove.LeftTurn();
+    }
+
 }

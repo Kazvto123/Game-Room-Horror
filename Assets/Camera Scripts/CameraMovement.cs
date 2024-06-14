@@ -7,20 +7,19 @@ public class CameraMovement : MonoBehaviour
     public float rotationSpeed = 50f; // Speed of rotation
     public float maxHorizontalRotation = 90f; // Maximum horizontal rotation (right)
     public float minHorizontalRotation = -90f; // Minimum horizontal rotation (left)
-    public float adjustedRotation = 0f;
-
+    
     public float edgeSize = 50f; // Size of the edge area
     public GameObject uiRightButton;
-    private bool uiRightButtonActivated;
+    public GameObject uiLeftButton;
 
     private bool screenLimit;
-    private bool rightSide;
+    private bool canRotating;
 
     void Start()
     {
         originalRotation = transform.rotation;
         screenLimit = true;
-        rightSide = false;
+        canRotating = true;
     }
 
     void Update()
@@ -29,21 +28,20 @@ public class CameraMovement : MonoBehaviour
         float screenWidth = Screen.width;
         float rotationAmount = 0f;
 
-        // Check if the cursor is near the left edge of the screen
-        if (mousePosition.x < edgeSize)
+        if (canRotating)
         {
-            rotationAmount = -rotationSpeed * Time.deltaTime;
-        }
-        // Check if the cursor is near the right edge of the screen
-        else if (mousePosition.x > screenWidth - edgeSize)
-        {
-            rotationAmount = rotationSpeed * Time.deltaTime;
+            if (mousePosition.x < edgeSize)
+            {
+                rotationAmount = -rotationSpeed * Time.deltaTime;
+            }
+            else if (mousePosition.x > screenWidth - edgeSize)
+            {
+                rotationAmount = rotationSpeed * Time.deltaTime;
+            }
+            
+            transform.Rotate(Vector3.up, rotationAmount);
         }
 
-        // Apply the rotation
-        transform.Rotate(Vector3.up, rotationAmount);
-
-        // Ensure rotation stays within limits
         if (screenLimit)
         {
             float currentRotationY = transform.eulerAngles.y;
@@ -54,42 +52,52 @@ public class CameraMovement : MonoBehaviour
             currentRotationY = Mathf.Clamp(currentRotationY, minHorizontalRotation, maxHorizontalRotation);
             transform.rotation = Quaternion.Euler(0f, currentRotationY, 0f);
 
-            // Right Button
-            // Check if the camera is at the maximum right rotation
-            if (currentRotationY >= maxHorizontalRotation && !rightSide)
-            {
-                // Get the RectTransform of the button
-                RectTransform rectTransform = uiRightButton.GetComponent<RectTransform>();
+            UpdateUIButtonPosition(currentRotationY);
+        }
+    }
 
-                // Set the position of the RectTransform
-                rectTransform.anchoredPosition = new Vector2(0f, 0f); // Set the position to (0, 0) when camera is at max horizontal rotation
-            }
-            // If the camera moves away from the maximum right rotation and the button is instantiated, destroy the button
-            else
-            {
-                // Get the RectTransform of the button
-                RectTransform rectTransform = uiRightButton.GetComponent<RectTransform>();
+    private void UpdateUIButtonPosition(float currentRotationY)
+    {
+        RectTransform rightButtonRectTransform = uiRightButton.GetComponent<RectTransform>();
+        RectTransform leftButtonRectTransform = uiLeftButton.GetComponent<RectTransform>();
 
-                // Set the position of the RectTransform
-                rectTransform.anchoredPosition = new Vector2(100f, 0f); // Set the position to (100, 0) when camera is not at max horizontal rotation
-            }
+        if (currentRotationY >= maxHorizontalRotation)
+        {
+            rightButtonRectTransform.anchoredPosition = new Vector2(0f, 0f); // Show right button
+        }
+        else
+        {
+            rightButtonRectTransform.anchoredPosition = new Vector2(100f, 0f); // Hide right button
+        }
+
+        if (currentRotationY <= minHorizontalRotation)
+        {
+            leftButtonRectTransform.anchoredPosition = new Vector2(0f, 0f); // Show left button
+        }
+        else
+        {
+            leftButtonRectTransform.anchoredPosition = new Vector2(-100f, 0f); // Hide left button
         }
     }
 
     public void RightTurn()
     {
+        canRotating = false;
         screenLimit = false;
-        StartCoroutine(SmoothRotate(new Vector3(0f, 110f, 0f), .25f)); // Smoothly rotate by 90 degrees in 1 second
-        minHorizontalRotation = 90 + minHorizontalRotation;
-        maxHorizontalRotation = 90 + maxHorizontalRotation;
-        screenLimit = true;
-        rightSide = true;
+        StartCoroutine(SmoothRotate(Vector3.up * 90f, 0.25f, true)); // Smoothly rotate by 90 degrees in 0.25 seconds
     }
 
-    IEnumerator SmoothRotate(Vector3 targetEulerAngles, float duration)
+    public void LeftTurn()
+    {
+        canRotating = false;
+        screenLimit = false;
+        StartCoroutine(SmoothRotate(Vector3.up * -90f, 0.25f, false)); // Smoothly rotate by -90 degrees in 0.25 seconds
+    }
+
+    IEnumerator SmoothRotate(Vector3 rotationAmount, float duration, bool isRightTurn)
     {
         Quaternion originalRotation = transform.rotation;
-        Quaternion targetRotation = Quaternion.Euler(targetEulerAngles);
+        Quaternion targetRotation = originalRotation * Quaternion.Euler(rotationAmount);
         float elapsedTime = 0f;
 
         while (elapsedTime < duration)
@@ -99,7 +107,20 @@ public class CameraMovement : MonoBehaviour
             yield return null;
         }
 
-        // Ensure the rotation finishes exactly at the target
         transform.rotation = targetRotation;
+        
+        if (isRightTurn)
+        {
+            minHorizontalRotation += 90f;
+            maxHorizontalRotation += 90f;
+        }
+        else
+        {
+            minHorizontalRotation -= 90f;
+            maxHorizontalRotation -= 90f;
+        }
+
+        screenLimit = true;
+        canRotating = true;
     }
 }
