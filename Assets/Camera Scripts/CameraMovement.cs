@@ -14,12 +14,14 @@ public class CameraMovement : MonoBehaviour
 
     private bool screenLimit;
     private bool canRotating;
+    private bool rightSide;
 
     void Start()
     {
         originalRotation = transform.rotation;
         screenLimit = true;
         canRotating = true;
+        rightSide = false;
     }
 
     void Update()
@@ -61,7 +63,7 @@ public class CameraMovement : MonoBehaviour
         RectTransform rightButtonRectTransform = uiRightButton.GetComponent<RectTransform>();
         RectTransform leftButtonRectTransform = uiLeftButton.GetComponent<RectTransform>();
 
-        if (currentRotationY >= maxHorizontalRotation)
+        if (currentRotationY >= maxHorizontalRotation && !rightSide)
         {
             rightButtonRectTransform.anchoredPosition = new Vector2(0f, 0f); // Show right button
         }
@@ -70,7 +72,7 @@ public class CameraMovement : MonoBehaviour
             rightButtonRectTransform.anchoredPosition = new Vector2(100f, 0f); // Hide right button
         }
 
-        if (currentRotationY <= minHorizontalRotation)
+        if (currentRotationY <= minHorizontalRotation && rightSide)
         {
             leftButtonRectTransform.anchoredPosition = new Vector2(0f, 0f); // Show left button
         }
@@ -82,16 +84,24 @@ public class CameraMovement : MonoBehaviour
 
     public void RightTurn()
     {
+        RectTransform rightButtonRectTransform = uiRightButton.GetComponent<RectTransform>();
+        rightButtonRectTransform.anchoredPosition = new Vector2(100f, 0f); // Hide right button
+        rightSide = true;
         canRotating = false;
         screenLimit = false;
         StartCoroutine(SmoothRotate(Vector3.up * 90f, 0.25f, true)); // Smoothly rotate by 90 degrees in 0.25 seconds
+        
     }
 
     public void LeftTurn()
     {
+        RectTransform leftButtonRectTransform = uiLeftButton.GetComponent<RectTransform>();
+        leftButtonRectTransform.anchoredPosition = new Vector2(-100f, 0f); // Hide left button
+        rightSide = false;
         canRotating = false;
         screenLimit = false;
         StartCoroutine(SmoothRotate(Vector3.up * -90f, 0.25f, false)); // Smoothly rotate by -90 degrees in 0.25 seconds
+        
     }
 
     IEnumerator SmoothRotate(Vector3 rotationAmount, float duration, bool isRightTurn)
